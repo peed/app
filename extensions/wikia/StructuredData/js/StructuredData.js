@@ -36,6 +36,21 @@ var StructuredData = {
 				$input.val(filePageUrl);
 			});
 		});
+
+		this.cachedSeletors.SDObjectWrapper.find('input[name="schema:url"]').click(function(event) {
+			event.preventDefault();
+			console.log('werwqrfafdasf');
+			$.when(
+				$.loadYUI(),
+				$.getScript(wgResourceBasePath + '/resources/wikia/libraries/mustache/jquery.mustache.js'),
+				$.getResources($.getSassCommonURL('/extensions/wikia/VideoEmbedTool/css/VET.scss')),
+				$.getScript(wgExtensionsPath + '/wikia/WikiaStyleGuide/js/Dropdown.js'),
+				$.getScript(wgExtensionsPath + '/wikia/VideoEmbedTool/js/VET.js')
+			).then(function() {
+				VET_show();
+			});
+		});
+
 		// Add date/time pickers only for SD object page
 		$('input[name="schema:startDate"]').datetimepicker({
 			changeMonth: true,
