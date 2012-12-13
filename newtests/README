@@ -1,1 +1,27 @@
-phpunit ../includes/wikia/tests/WikiaValidatorUrlTest.php
+1. Install extensions:
+
+# test_helpers
+git clone https://github.com/sebastianbergmann/php-test-helpers.git
+cd php-test-helpers
+phpize
+./configure
+make
+sudo make install
+
+# runkit
+git clone https://github.com/zenovich/runkit.git
+cd runkit
+phpize
+./configure
+make
+sudo make install
+
+2. Enable extensions:
+
+# in php.ini:
+extension=runkit.so
+extension=test_helpers.so
+
+This command should say two times enabled:
+
+php -i | egrep 'runkit support|test_helpers support'
