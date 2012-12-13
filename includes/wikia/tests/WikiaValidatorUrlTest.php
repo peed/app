@@ -17,14 +17,14 @@ class WikiaValidatorUrlTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @dataProvider testUrlsDataProvider
+	 * @dataProvider UrlsDataProvider
 	 */
 	public function testUrls($string, $isUrl) {
 		$result = $this->validator->isValid($string);
 		$this->assertEquals($isUrl, $result);
 	}
 
-	public function testUrlsDataProvider() {
+	public function UrlsDataProvider() {
 		return array(
 			array('http://www.wikia.com',true),
 			array('www.wikia.com',true),
