@@ -1,5 +1,14 @@
 <?php
 
+require __DIR__ . '/../validators/WikiaValidator.class.php';
+require __DIR__ . '/../validators/WikiaValidatorRegex.class.php';
+require __DIR__ . '/../validators/WikiaValidatorUrl.class.php';
+require __DIR__ . '/../validators/WikiaValidationError.class.php';
+
+function wfMsg($msg) {
+	return $msg;
+}
+
 class WikiaValidatorUrlTest extends PHPUnit_Framework_TestCase {
 
 	/* @var $validator WikiaValidatorUrl */
