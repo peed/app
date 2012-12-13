@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="bootstrap.php"
-         backupGlobals="false"
-         backupStaticAttributes="false"
-         syntaxCheck="false">
-  <testsuites>
-    <testsuite name="Wikia extensions tests">
-      <directory suffix="TestNew.php">../extensions/wikia</directory>
-    </testsuite>
-    <testsuite name="Wikia includes tests">
-      <directory suffix="Test.php">../includes/wikia/tests</directory>
-    </testsuite>
-  </testsuites>
+	backupGlobals="false"
+	backupStaticAttributes="false"
+	syntaxCheck="false">
+	<testsuites>
+		<testsuite name="Wikia extensions tests">
+			<directory suffix="TestNew.php">../extensions/wikia</directory>
+		</testsuite>
+		<testsuite name="Wikia includes tests">
+			<directory suffix="Test.php">../includes/wikia/tests</directory>
+		</testsuite>
+	</testsuites>
+	<groups>
+		<include>
+			<group>SaneTest</group>
+		</include>
+	</groups>
 </phpunit>
