@@ -1,9 +1,5 @@
 <?php
 
-function wfMsg($msg) {
-	return $msg;
-}
-
 /**
  * @group SaneTest
  */
@@ -14,6 +10,11 @@ class WikiaValidatorUrlTest extends PHPUnit_Framework_TestCase {
 
 	protected function setUp() {
 		$this->validator = new WikiaValidatorUrl();
+		runkit_function_add('wfMsg', '$msg', 'return $msg;');
+	}
+
+	protected function tearDown() {
+		runkit_function_remove('wfMsg');
 	}
 
 	/**
