@@ -1,5 +1,21 @@
 <?php
 
+
+class App {
+	public $wf;
+	public $wg;
+
+	public function __construct() {
+		$this->wf = new WikiaFunctionWrapper();
+	}
+}
+
+class WikiaFunctionWrapper {
+	public function __call($method, $args) {
+		return $args;
+	}
+}
+
 /**
  * Bootstrap for PHP unit tests
  */
@@ -9,7 +25,9 @@ class CustomAutoloader {
 	private $classes = array();
 
 	private $classMapping = array(
-		'F' => 'WikiaSuperFactory'
+		'F' => 'WikiaSuperFactory',
+		'DatabaseBase' => 'Database',
+		'Field' => 'DatabaseUtility'
 	);
 
 	public function loadClass($className) {
@@ -35,4 +53,7 @@ class CustomAutoloader {
 }
 
 spl_autoload_register(array(new CustomAutoloader(), 'loadClass'));
+
+require __DIR__ . '/../includes/Defines.php';
+require __DIR__ . '/../includes/Exception.php';
 

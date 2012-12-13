@@ -1,6 +1,9 @@
 <?
 
-class MarketingToolboxModelTest extends WikiaBaseTest {
+/**
+ * @group SaneTest
+ */
+class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * (non-PHPdoc)
@@ -383,10 +386,13 @@ class MarketingToolboxModelTest extends WikiaBaseTest {
 			'editorId' => 666
 		);
 
-		$dbMock = $this->getMock('DatabaseMysql', array('selectField', 'insert'));
+		$dbMock = $this->getMock('DatabaseMysql', array('selectField', 'insert', 'timestamp'));
 		$dbMock->expects($this->once())
 			->method('selectField')
 			->will($this->returnValue(0));
+
+		$dbMock->expects($this->any())
+			->method('timestamp');
 
 		$dbMock->expects($this->once())
 			->method('insert')
@@ -441,10 +447,13 @@ class MarketingToolboxModelTest extends WikiaBaseTest {
 			'editorId' => 666
 		);
 
-		$dbMock = $this->getMock('DatabaseMysql', array('selectField', 'update'));
+		$dbMock = $this->getMock('DatabaseMysql', array('selectField', 'update', 'timestamp'));
 		$dbMock->expects($this->once())
 			->method('selectField')
 			->will($this->returnValue(1));
+
+		$dbMock->expects($this->any())
+			->method('timestamp');
 
 		$dbMock->expects($this->once())
 			->method('update')

@@ -1,10 +1,5 @@
 <?
 
-class App {
-	public $wf;
-	public $wg;
-}
-
 class MarketingToolboxSliderModelTest extends PHPUnit_Framework_TestCase {
 
 
