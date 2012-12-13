@@ -6,33 +6,29 @@
 
 // Autoloader:
 class CustomAutoloader {
-	private static $classes = array();
+	private $classes = array();
 
 	private $classMapping = array(
 		'F' => 'WikiaSuperFactory'
 	);
 
 	public function loadClass($className) {
-		$this->getClasses();
-
 		if (isset($this->classMapping[$className])) {
 			$className = $this->classMapping[$className];
 		}
 
-		if (isset(self::$classes[$className])) {
-			require self::$classes[$className];
+		if (isset($this->classes[$className])) {
+			require $this->classes[$className];
 		}
 	}
 
-	private function getClasses() {
-		if (empty(self::$classes)) {
-			$it = new RecursiveDirectoryIterator(dirname(__DIR__));
-			foreach (new RecursiveIteratorIterator($it) as $file) {
-				$filename = $file->getFilename();
-				if (strpos($filename, '.php')) {
-					$className = preg_replace('/(\.class)?\.php/', '', $filename);
-					self::$classes[$className] = $file->getPathname();
-				}
+	public function __construct() {
+		$it = new RecursiveDirectoryIterator(dirname(__DIR__));
+		foreach (new RecursiveIteratorIterator($it) as $file) {
+			$filename = $file->getFilename();
+			if (strpos($filename, '.php')) {
+				$className = preg_replace('/(\.class)?\.php/', '', $filename);
+				$this->classes[$className] = $file->getPathname();
 			}
 		}
 	}
