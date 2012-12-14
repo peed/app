@@ -34,7 +34,7 @@ class SearchEngine {
 		if ( $db ) {
 			$this->db = $db;
 		} else {
-			$this->db = wfGetDB( DB_SLAVE );
+			$this->db = F::app()->wf->getDb( DB_SLAVE );
 		}
 	}
 
@@ -381,9 +381,7 @@ class SearchEngine {
 	 * @return Array
 	 */
 	public static function defaultNamespaces() {
-		global $wgNamespacesToBeSearchedDefault;
-
-		return array_keys( $wgNamespacesToBeSearchedDefault, true );
+		return array_keys( F::app()->wg->NamespacesToBeSearchedDefault, true );
 	}
 
 	/**

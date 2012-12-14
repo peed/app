@@ -14,7 +14,7 @@ class WikiaSearchBaseTest extends WikiaBaseTest {
 	 * @see WikiaBaseTest::setUp()
 	 */
 	public function setUp() {
-	    $this->setupFile = dirname(__FILE__) . '/../WikiaSearch.setup.php';
+	    //$this->setupFile = dirname(__FILE__) . '/../WikiaSearch.setup.php';
 	    parent::setUp();
 	}
 	

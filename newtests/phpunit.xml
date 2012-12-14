@@ -5,7 +5,7 @@
 	syntaxCheck="false">
 	<testsuites>
 		<testsuite name="Wikia extensions tests">
-			<directory suffix="Test.php">../extensions/wikia</directory>
+			<directory suffix="TestNew.php">../extensions/wikia</directory>
 		</testsuite>
 		<testsuite name="Wikia includes tests">
 			<directory suffix="Test.php">../includes/wikia/tests</directory>

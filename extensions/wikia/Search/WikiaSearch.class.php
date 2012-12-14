@@ -387,6 +387,7 @@ class WikiaSearch extends WikiaObject {
 	    }
 	    
 	    $term 			= $config->getOriginalQuery();
+
 	    $searchEngine	= F::build( 'SearchEngine' );
     	$title			= $searchEngine->getNearMatch( $term );
     	
@@ -437,10 +438,10 @@ class WikiaSearch extends WikiaObject {
 	public static function field ( $field, $lang = null )
 	{
 		wfProfileIn( __METHOD__ );
-		global $wgLanguageCode, $wgWikiaSearchSupportedLanguages;
-	    $lang = $lang ?: preg_replace( '/-.*/', '', $wgLanguageCode );
+		//global $wgLanguageCode, $wgWikiaSearchSupportedLanguages;
+	    $lang = $lang ?: preg_replace( '/-.*/', '', F::app()->wg->LanguageCode );
 	    if ( 		in_array( $field,	self::$languageFields )
-	            &&	in_array( $lang,	$wgWikiaSearchSupportedLanguages ) ) {
+	            &&	in_array( $lang,	F::app()->wg->wikiaSearchSupportedLanguages ) ) {
 	
 	        $us = in_array( $field, self::$dynamicUnstoredFields )	? '_us' : '';
 	        $mv = in_array( $field, self::$multiValuedFields )		? '_mv' : '';
@@ -495,7 +496,7 @@ class WikiaSearch extends WikiaObject {
 		
 		$query	->addFields		( $searchConfig->getRequestedFields() )
 				->removeField	('*')
-			  	->setStart		( $searchConfig->getStart() )
+				->setStart		( $searchConfig->getStart() )
 				->setRows		( $searchConfig->getLength() )
 				->addSort		( $sort[0], $sort[1] )
 				->addParam		( 'timeAllowed', $searchConfig->isInterWiki() ? 7500 : 5000 )
@@ -505,7 +506,7 @@ class WikiaSearch extends WikiaObject {
 		$highlighting->addField						( self::field( 'html' ) )
 					 ->setSnippets					( 1 )
 					 ->setRequireFieldMatch			( true )
-					 ->setFragSize					( self::HL_FRAG_SIZE )      
+					 ->setFragSize					( self::HL_FRAG_SIZE )
 					 ->setSimplePrefix				( self::HL_MATCH_PREFIX )
 					 ->setSimplePostfix				( self::HL_MATCH_POSTFIX )
 					 ->setAlternateField			( 'nolang_txt' )
@@ -647,7 +648,6 @@ class WikiaSearch extends WikiaObject {
 		$queryClauses = array();
 		
 		if ( $searchConfig->isInterWiki() ) {
-			
 			$widQueries = array();
 			foreach ( $this->getInterWikiSearchExcludedWikis() as $excludedWikiId ) {
 			    $widQueries[] = self::valueForField( 'wid',  $excludedWikiId, array( 'negate' => true ) );
@@ -673,7 +673,7 @@ class WikiaSearch extends WikiaObject {
 			} else {
 				array_unshift( $queryClauses, self::valueForField( 'wid', $searchConfig->getCityId() ) );
 			}
-			
+
 			$nsQuery = '';
 			foreach ( $searchConfig->getNamespaces() as $namespace ) {
 				$nsQuery .= ( !empty($nsQuery) ? ' OR ' : '' ) . self::valueForField( 'ns', $namespace );
