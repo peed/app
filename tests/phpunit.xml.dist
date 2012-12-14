@@ -19,7 +19,8 @@
 		<directory>../extensions/FBConnect/</directory>
 	</testsuite>
 	<testsuite name="Wikia Extensions Test Suite">
-		<directory>../extensions/wikia/</directory>
+		<directory suffix="Test.php">../extensions/wikia/</directory>
+		<directory suffix="TestNonKosher.php">../extensions/wikia/</directory>
 	</testsuite>
 	<testsuite name="Wikia Maintenance Test Suite">
 		<directory>../maintenance/wikia/tests/</directory>
@@ -34,6 +35,7 @@
 		<exclude>
 			<group>Broken</group>
 			<group>Stub</group>
+			<group>Kosher</group> <!-- Handled by phpunit from newtests directory -->
 		</exclude>
 	</groups>
 	<filter>
