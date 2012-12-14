@@ -15,18 +15,11 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetModuleName() {
-		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('msg'));
-
-		$functionWrapperMock->expects($this->once())
-			->method('msg')
-			->with('marketing-toolbox-hub-module-top10-list')
-			->will($this->returnValue('testNameFor Top 10 list'));
-
-		$app = new WikiaApp(null, null, null, $functionWrapperMock);
+		$appMock = new WikiaAppMock();
+		$appMock->mockGlobalFunction('msg', 'testNameFor Top 10 list');
+		$appMock->registerFapp();
 
 		$model = new MarketingToolboxModel();
-
-		$model->setApp($app);
 
 		$this->assertEquals(
 			'testNameFor Top 10 list',
@@ -58,16 +51,11 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetAvailableSections() {
-		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('msg'));
+		$app = new WikiaAppMock();
+		$app->mockGlobalFunction('msg', 'test name for hubs section');
+		$app->registerFapp();
 
-		$functionWrapperMock->expects($this->at(0))
-			->method('msg')
-			->with($this->equalTo('marketing-toolbox-section-hubs-button'))
-			->will($this->returnValue('test name for hubs section'));
-
-		$app = new WikiaApp(null, null, null, $functionWrapperMock);
-
-		$model = new MarketingToolboxModel($app);
+		$model = new MarketingToolboxModel();
 
 		$sections = $model->getAvailableSections();
 		$this->assertArrayHasKey(MarketingToolboxModel::SECTION_HUBS, $sections);
@@ -149,25 +137,24 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 			'activeModule' => MarketingToolboxModel::MODULE_WIKIAS_PICKS
 		);
 
-		// Mock database
-		$dbMock = $this->getMock('DatabaseMysql', array('selectField', 'makeList'));
-		$dbMock->expects($this->once())
-			->method('selectField')
-			->will($this->returnValue(0));
-		$dbMock->expects($this->any())
-			->method('makeList')
-			->will($this->returnValue(''));
-
-		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('GetDB'));
-
-		$functionWrapperMock->expects($this->any())
-			->method('GetDB')
-			->will($this->returnValue($dbMock));
-
-		$app = new WikiaApp(null, null, null, $functionWrapperMock);
-
 		// Mock model
-		$modelMock = $this->getMock('MarketingToolboxModel', array('getModulesDataFromDb', 'getModuleUrl'), array($app));
+		// Mock database
+		$dbMock = PHPUnit_Framework_MockObject_Generator::getMock('stdClass', array('selectField', 'makeList'));
+		$dbMock->expects(self::once())
+			->method('selectField')
+			->will(self::returnValue(0));
+		$dbMock->expects(self::any())
+			->method('makeList')
+			->will(self::returnValue(''));
+
+		$wikiaAppMock = new WikiaAppMock();
+		$wikiaAppMock->mockGlobalVariable('wgExternalSharedDB', 'shareddb');
+		$wikiaAppMock->mockGlobalFunction('getDb', $dbMock);
+		$wikiaAppMock->mockGlobalFunction('msg', 'Translated message');
+
+		$wikiaAppMock->registerFapp();
+
+		$modelMock = $this->getMock('MarketingToolboxModel', array('getModulesDataFromDb', 'getModuleUrl'));
 
 		$modelMock->expects($this->once())
 			->method('getModulesDataFromDb')
@@ -249,7 +236,6 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 		}
 		$mockedModulesData[9] = $mockDataForLastModule;
 
-
 		// Mock database
 		$dbMock = $this->getMock('DatabaseMysql', array('selectField', 'makeList'));
 		$dbMock->expects($this->once())
@@ -259,13 +245,11 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 			->method('makeList')
 			->will($this->returnValue(''));
 
-		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('GetDB'));
-
-		$functionWrapperMock->expects($this->any())
-			->method('GetDB')
-			->will($this->returnValue($dbMock));
-
-		$app = new WikiaApp(null, null, null, $functionWrapperMock);
+		$appMock = new WikiaAppMock();
+		$appMock->mockGlobalFunction('getDb', $dbMock);
+		$appMock->mockGlobalFunction('msg', 'Translated message');
+		$appMock->mockGlobalVariable('wgExternalSharedDB', 'shareddb');
+		$appMock->registerFapp();
 
 		// User Mock
 		$userMock = $this->getMock(
@@ -283,8 +267,7 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 		// Mock model
 		$modelMock = $this->getMock(
 			'MarketingToolboxModel',
-			array('getModulesDataFromDb', 'getModuleUrl', 'getDefaultModuleList'),
-			array($app)
+			array('getModulesDataFromDb', 'getModuleUrl', 'getDefaultModuleList')
 		);
 
 		$modelMock->expects($this->at(0))
@@ -410,15 +393,13 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 				)
 			);
 
-		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('GetDB'));
+		$appMock = new WikiaAppMock();
+		$appMock->mockGlobalFunction('getDB', $dbMock);
+		$appMock->mockGlobalFunction('msg', 'Translated message');
+		$appMock->mockGlobalVariable('wgExternalSharedDB', 'shareddb');
+		$appMock->registerFapp();
 
-		$functionWrapperMock->expects($this->any())
-			->method('GetDB')
-			->will($this->returnValue($dbMock));
-
-		$app = new WikiaApp(null, null, null, $functionWrapperMock);
-
-		$model = new MarketingToolboxModel($app);
+		$model = new MarketingToolboxModel();
 
 		$model->saveModule(
 			$dataToInsert['lang'],
@@ -475,7 +456,7 @@ class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 			)
 		);
 
-		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('GetDB'));
+		$functionWrapperMock = $this->getMock('WikiaFunctionWrapper', array('GetDB', 'msg'));
 
 		$functionWrapperMock->expects($this->any())
 			->method('GetDB')
