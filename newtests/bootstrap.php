@@ -50,29 +50,3 @@ spl_autoload_register(array(new CustomAutoloader(), 'loadClass'));
 class App extends WikiaAppMock {
 }
 F::app();
-
-// Shutdown for catching PHP Fatal Errors:
-function unitTestsShutdownHandler()
-{
-	if (! $err = error_get_last()) {
-		return;
-	}
-
-	$fatals = array(
-		E_USER_ERROR      => 'Fatal Error',
-		E_ERROR           => 'Fatal Error',
-		E_PARSE           => 'Parse Error',
-		E_CORE_ERROR      => 'Core Error',
-		E_CORE_WARNING    => 'Core Warning',
-		E_COMPILE_ERROR   => 'Compile Error',
-		E_COMPILE_WARNING => 'Compile Warning'
-	);
-
-	if (isset($fatals[$err['type']])) {
-		$msg = $fatals[$err['type']] . ': ' . $err['message'] . ' in ';
-		$msg.= $err['file'] . ' on line ' . $err['line'];
-		error_log($msg);
-	}
-}
-
-register_shutdown_function('unitTestsShutdownHandler');
