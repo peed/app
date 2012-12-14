@@ -1,7 +1,7 @@
 <?
 
 /**
- * @group SaneTest
+ * @group Kosher
  */
 class MarketingToolboxModelTest extends PHPUnit_Framework_TestCase {
 

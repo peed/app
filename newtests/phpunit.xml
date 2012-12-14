@@ -13,7 +13,7 @@
 	</testsuites>
 	<groups>
 		<include>
-			<group>SaneTest</group>
+			<group>Kosher</group>
 		</include>
 	</groups>
 </phpunit>

@@ -4,7 +4,7 @@ class MarketingToolboxSliderModelTest extends PHPUnit_Framework_TestCase {
 
 
 	/**
-	 * @group SaneTest
+	 * @group Kosher
 	 */
 	public function testGetSlidesCount() {
 		$model = new MarketingToolboxSliderModel();

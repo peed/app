@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @group SaneTest
+ * @group Kosher
  */
 class WikiaValidatorUrlTest extends PHPUnit_Framework_TestCase {
 
