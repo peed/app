@@ -8,6 +8,7 @@
 $IP = dirname(__DIR__);
 require __DIR__ . '/../includes/AutoLoader.php';
 require __DIR__ . '/../includes/Defines.php';
+define('MEDIAWIKI', 1);
 
 // Libs autoloaders
 require '../extensions/wikia/Search/Solarium/Autoloader.php';
@@ -27,7 +28,7 @@ class CustomAutoloader {
 		}
 
 		if (isset($this->classes[$className])) {
-			require $this->classes[$className];
+			require_once $this->classes[$className];
 		}
 	}
 
@@ -43,3 +44,8 @@ class CustomAutoloader {
 	}
 }
 spl_autoload_register(array(new CustomAutoloader(), 'loadClass'));
+
+// Hack for App;
+class App extends WikiaAppMock {
+}
+F:app();
