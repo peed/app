@@ -48,4 +48,4 @@ spl_autoload_register(array(new CustomAutoloader(), 'loadClass'));
 // Hack for App;
 class App extends WikiaAppMock {
 }
-F:app();
+F::app();
