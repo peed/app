@@ -1,6 +1,6 @@
 <?
 class MarketingToolboxModulePulseService extends MarketingToolboxModuleService {
-	protected function getFormFields() {
+	protected function getFormFields($data = array()) {
 		return array(
 			'boardUrl' => array(
 				'label' => $this->wf->msg('marketing-toolbox-hub-module-pulse-wikiurl'),

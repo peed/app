@@ -17,7 +17,7 @@ class MarketingToolboxModuleExploreService extends MarketingToolboxModuleService
 		$this->model = new MarketingToolboxExploreModel();
 	}
 
-	protected function getFormFields() {
+	protected function getFormFields($data = array()) {
 		$formFields = array(
 			'exploreTitle' => array(
 				'label' => $this->wf->Msg('marketing-toolbox-hub-module-explore-title'),
@@ -40,7 +40,7 @@ class MarketingToolboxModuleExploreService extends MarketingToolboxModuleService
 			$formFields = $formFields + $this->generateSectionHeaderField($sectionIdx);
 
 			for($linkIdx = 0; $linkIdx < $linksLimit; $linkIdx++) {
-				$formFields = $formFields + $this->generateSectionLinkFields($sectionIdx, $linkIdx);
+				$formFields = $formFields + $this->generateSectionLinkFields($sectionIdx, $linkIdx, $data);
 			}
 		}
 
@@ -57,7 +57,7 @@ class MarketingToolboxModuleExploreService extends MarketingToolboxModuleService
 		);
 	}
 
-	protected function generateSectionLinkFields($sectionIdx, $linkIdx) {
+	protected function generateSectionLinkFields($sectionIdx, $linkIdx, $data) {
 		$linkUrlFieldName = self::LINK_URL . $sectionIdx . $this->lettersMap[$linkIdx];
 
 		$linkUrlField = array(
@@ -88,8 +88,24 @@ class MarketingToolboxModuleExploreService extends MarketingToolboxModuleService
 							'too_short' => 'marketing-toolbox-hub-module-explore-link-text-too-short-error'
 						)
 					),
-					'dependentField' => $linkUrlFieldName,
-					'dependentFieldCondition' => WikiaValidatorDependent::CONDITION_NOT_EMPTY
+					'dependencyData' => $data,
+					'dependentFields' =>
+						array(
+							$linkUrlFieldName => array(
+								'label' => $this->wf->Msg('marketing-toolbox-hub-module-explore-link-url'),
+								'validator' => new WikiaValidatorUrl(
+									array(
+										'required' => true,
+									),
+									array(
+										'wrong' => 'marketing-toolbox-hub-module-explore-link-url-invalid'
+									)
+								),
+								'attributes' => array(
+									'class' => "wikiaUrl"
+								)
+							)
+						)
 				)
 			),
 			'attributes' => array(

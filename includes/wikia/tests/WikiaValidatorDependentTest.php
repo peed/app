@@ -1,4 +1,5 @@
 <?php
+
 class WikiaValidatorDependentTest extends WikiaBaseTest {
 	
 	public function testIsValidWithInvalidConfigParams() {
@@ -8,7 +9,8 @@ class WikiaValidatorDependentTest extends WikiaBaseTest {
 		$validator = new WikiaValidatorDependent(array(
 			'required' => false,
 			'ownValidator' => $wikiaValidatorStringStub,
-			'dependentFieldCondition' => WikiaValidatorDependent::CONDITION_NOT_EMPTY
+			'dependencyData' => array(),
+			'dependentFields' => array()
 		));
 		$this->setExpectedException('Exception');
 		$validator->isValid('testValue');
@@ -16,8 +18,8 @@ class WikiaValidatorDependentTest extends WikiaBaseTest {
 		//no ownValidator passed
 		$validator = new WikiaValidatorDependent(array(
 			'required' => false,
-			'dependentField' => 'aFormFieldName',
-			'dependentFieldCondition' => WikiaValidatorDependent::CONDITION_NOT_EMPTY
+			'dependencyData' => array(),
+			'dependentFields' => array('aField' => array()),
 		));
 		$this->setExpectedException('Exception');
 		$validator->isValid('testValue');
@@ -26,8 +28,8 @@ class WikiaValidatorDependentTest extends WikiaBaseTest {
 		$validator = new WikiaValidatorDependent(array(
 			'required' => false,
 			'ownValidator' => new stdClass(),
-			'dependentField' => 'aFormFieldName',
-			'dependentFieldCondition' => WikiaValidatorDependent::CONDITION_NOT_EMPTY
+			'dependencyData' => array(),
+			'dependentFields' => array('aField' => array()),
 		));
 		$this->setExpectedException('Exception');
 		$validator->isValid('testValue');
@@ -41,34 +43,28 @@ class WikiaValidatorDependentTest extends WikiaBaseTest {
 		$validator = new WikiaValidatorDependent(array(
 			'required' => false,
 			'ownValidator' => $wikiaValidatorStringStub,
-			'dependentField' => 'aFormFieldName',
-			'dependentFieldCondition' => WikiaValidatorDependent::CONDITION_NOT_EMPTY
+			'dependencyData' => array(),
+			'dependentFields' => array('aField' => array('validator' => $wikiaValidatorStringStub))
 		));
 
 		//CORRECT dependent field not empty, so we validate & own validator's method isValid() returns true
-		$validator->setFormData(array(
-			'aFormFieldName' => 'aFormFieldValue'
-		));
 		$this->assertEquals(true, $validator->isValid('aValue'));
 
 		//CORRECT -- dependent field empty, so we won't validate -- no error
-		$validator->setFormData(array(
-			'aFormFieldName' => ''
-		));
+		$wikiaValidatorStringStub->expects($this->any())->method('isValid')->will($this->returnValue(false));
 		$this->assertEquals(true, $validator->isValid('aValue'));
 
 		//FAILED -- dependent field not empty but own validator's method isValid() returns false
-		$wikiaValidatorStringStub = $this->getMock('WikiaValidatorString');
-		$wikiaValidatorStringStub->expects($this->any())->method('isValid')->will($this->returnValue(false));
+		$wikiaValidatorStringStub->expects($this->any())->method('isValid')->will($this->returnValue(true));
+		$internalWikiaValidatorStringStub = $this->getMock('WikiaValidatorString');
+		$internalWikiaValidatorStringStub->expects($this->any())->method('isValid')->will($this->returnValue(false));
 		$validator = new WikiaValidatorDependent(array(
 			'required' => false,
-			'ownValidator' => $wikiaValidatorStringStub,
-			'dependentField' => 'aFormFieldName',
-			'dependentFieldCondition' => WikiaValidatorDependent::CONDITION_NOT_EMPTY
+			'ownValidator' => $internalWikiaValidatorStringStub,
+			'dependencyData' => array(),
+			'dependentFields' => array('aField' => array('validator' => $wikiaValidatorStringStub))
 		));
-		$validator->setFormData(array(
-			'aFormFieldName' => 'aFormFieldValue'
-		));
+
 		$this->assertEquals(false, $validator->isValid('aValue'));
 	}
 	

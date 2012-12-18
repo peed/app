@@ -1,6 +1,6 @@
 <?php
 class MarketingToolboxModulePollsService extends MarketingToolboxModuleService {
-	protected function getFormFields() {
+	protected function getFormFields($data = array()) {
 		$fields = array(
 			'pollsTitle' => array(
 				'label' => $this->wf->msg('marketing-toolbox-hub-module-polls-title'),

@@ -1,6 +1,6 @@
 <?
 class MarketingToolboxModuleTop10listService extends MarketingToolboxModuleService {
-	protected function getFormFields() {
+	protected function getFormFields($data = array()) {
 		return array(
 			'boardTitle' => array(
 				'label' => $this->wf->msg('marketing-toolbox-hub-module-top10list-title'),

@@ -1,6 +1,6 @@
 <?php
 class MarketingToolboxModuleFeaturedvideoService extends MarketingToolboxModuleService {
-	protected function getFormFields() {
+	protected function getFormFields($data = array()) {
 		return array();
 	}
 }

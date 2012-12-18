@@ -7,7 +7,7 @@ abstract class MarketingToolboxModuleService extends WikiaService {
 	protected $sectionId;
 	protected $verticalId;
 
-	abstract protected function getFormFields();
+	abstract protected function getFormFields($data = array());
 
 	public function __construct($langCode, $sectionId, $verticalId) {
 		parent::__construct();
@@ -29,16 +29,11 @@ abstract class MarketingToolboxModuleService extends WikiaService {
 
 	public function validate($data) {
 		$out = array();
-		$fields = $this->getFormFields();
+		$fields = $this->getFormFields($data);
 
 		foreach ($fields as $fieldName => $field) {
 			if (!empty($field['validator'])) {
 				$fieldData = isset($data[$fieldName]) ? $data[$fieldName] : null;
-
-				if( $field['validator'] instanceof WikiaValidatorDependent ) {
-					$field['validator']->setFormData($data);
-					$field['validator']->setFormFields($fields);
-				}
 
 				if (!$field['validator']->isValid($fieldData) && (($validationError = $field['validator']->getError()) instanceof WikiaValidationError)) {
 					$out[$fieldName] = $validationError->getMsg();
