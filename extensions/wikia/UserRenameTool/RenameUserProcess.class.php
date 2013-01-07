@@ -846,7 +846,7 @@ class RenameUserProcess {
 		$this->invalidateUser($this->mOldUsername);
 
 		$this->addLog("Invalidate user data on local Wiki ({$wgCityId}): {$this->mNewUsername}");
-		$this->invalidateUser($this->mOldUsername);
+		$this->invalidateUser($this->mNewUsername);
 
 		$wgUser = $wgOldUser;
 
@@ -939,7 +939,7 @@ class RenameUserProcess {
 			$fakeUser = User::newFromId($this->mFakeUserId);
 			$fakeUser->setOption( 'renameData', self::RENAME_TAG . '=' . $this->mNewUsername);
 			$fakeUser->saveSettings();
-			$fakeUser->saveToCache();
+			$fakeUser->invalidateCache();
 		}
 
 		//TODO: Add a hook
