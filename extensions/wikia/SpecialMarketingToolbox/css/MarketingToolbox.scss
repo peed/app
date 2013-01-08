@@ -53,12 +53,6 @@ $chevron-color: #888;
 
 	.error {
 		font-size: 12px;
-		margin-left: 7px;
-		clear: left;
-	}
-
-	.input-group .error {
-		margin-left: 0;
 	}
 
 	.input-group:not(.borderNone) {
@@ -208,6 +202,14 @@ $chevron-color: #888;
 				}
 			}
 		}
+
+		&.leading {
+			.module-right-box {
+				height: 50px;
+				width: 100%;
+			}
+		}
+
 		.wmu-show, .vet-show {
 			float: left;
 		}
