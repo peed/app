@@ -313,12 +313,7 @@ window.RTE.tools = {
 				callback(json);
 			}
 		});
-	},
-
-	// makes the element and its children unselectable
-	// @see http://www.highdots.com/forums/javascript/making-image-unselectable-ff-292462.html
-	// TODO: remove as it's no longer needed
-	unselectable: function(elem) {}
+	}
 }
 
 // helper class for highlighting given parts of editor's HTML

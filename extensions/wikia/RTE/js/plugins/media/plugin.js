@@ -133,7 +133,6 @@ CKEDITOR.plugins.add('rte-media',
 
 		RTE.overlay.add(media, standardButtons);
 
-
 		// unbind previous events
 		media.unbind('.media');
 
@@ -141,9 +140,6 @@ CKEDITOR.plugins.add('rte-media',
 		media.bind('dragged.media', function(ev) {
 			 RTE.track(self.getTrackingType($(this)), 'event', 'move');
 		});
-
-		// make media not selecteable
-		RTE.tools.unselectable(media);
 
 		// setup events once more on each drag&drop
 		RTE.getEditor().unbind('dropped.media').bind('dropped.media', function(ev, extra) {
@@ -255,7 +251,7 @@ CKEDITOR.plugins.add('rte-media',
 		mediaWithCaption.each(function() {
 			$(this).css('backgroundPosition', '5px ' + parseInt($(this).attr('height') + 10)  + 'px');
 		});
-		
+
 		// images / videos / poll specific setup
 		var image = media.filter('img.image');
 		self.setupImage(image);
@@ -270,9 +266,9 @@ CKEDITOR.plugins.add('rte-media',
 		if (RTE.config.disableDragDrop) {
 			RTE.tools.disableDragDrop(media);
 		}
-		
-		// Modifications to the DOM will register as content changes. Reset the dirty state.		
-		editor.resetDirty();		
+
+		// Modifications to the DOM will register as content changes. Reset the dirty state.
+		editor.resetDirty();
 	},
 
 	// image specific setup

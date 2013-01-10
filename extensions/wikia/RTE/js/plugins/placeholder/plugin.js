@@ -256,9 +256,7 @@ CKEDITOR.plugins.add('rte-placeholder',
 		});
 
 		// hide remaining previews
-		this.previews.children().not(preview).each(function() {
-			$(this).hide();
-		});
+		this.previews.children().not(preview).hide();
 
 		// hover preview popup delay: 150ms (cursor should be kept over an placeholder for 150ms for preview to show up)
 		var self = this;
@@ -334,9 +332,6 @@ CKEDITOR.plugins.add('rte-placeholder',
 			// don't show CK context menu
 			ev.stopPropagation();
 		});
-
-		// make placeholder not selecteable
-		RTE.tools.unselectable(placeholder);
 
 		// this event is triggered by clicking [edit] in preview pop-up
 		placeholder.bind('edit.placeholder', function(ev) {
