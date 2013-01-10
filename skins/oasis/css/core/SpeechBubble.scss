@@ -44,6 +44,9 @@
 			overflow: hidden;
 			width: 553px;
 		}
+        .toc ul {
+            list-style-type: none;
+        }
 	}
 	.speech-bubble-message:before {
 		border-color: transparent $color-page-border $color-page-border transparent;
