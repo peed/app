@@ -34,13 +34,13 @@ class SpecialCategoryIntersection extends SpecialPage {
 	public $defaultLimit = 25;
 
 	static private $CAT_PREFIX = "category_";
-	private $CATEGORY_NS_PREFIX;
+//	private $CATEGORY_NS_PREFIX;
 
 	public function __construct() {
 		parent::__construct( 'CategoryIntersection' );
 
-		global $wgContLang;
-		$this->CATEGORY_NS_PREFIX = $wgContLang->getNSText(NS_CATEGORY) . ":"; // the actual namespace prefix (includes the colon at the end).
+//		global $wgContLang;
+//		$this->CATEGORY_NS_PREFIX = $wgContLang->getNSText(NS_CATEGORY) . ":"; // the actual namespace prefix (includes the colon at the end).
 	}
 
 	public function getDocumentationUrl(){
@@ -188,7 +188,7 @@ class SpecialCategoryIntersection extends SpecialPage {
 		$value = $wgRequest->getVal($formName);
 		// The wrapper is what the auto-complete popupwill be appended to.
 		$zIndex = (300 - $num); // make the top boxes show up on top of anything below them
-		return "<div class='autoCompleteWrapper' style='z-index:$zIndex'><input type='text' name='$formName' value='$value' autocomplete='off' placeholder='".$this->CATEGORY_NS_PREFIX."...'/></div>\n";
+		return "<div class='autoCompleteWrapper' style='z-index:$zIndex'><input type='text' name='$formName' value='$value' autocomplete='off' placeholder='".wfMsg('categoryintersection-input')."...'/></div>\n";
 	} // end getHtmlForCategoryBox()
 
 	/**
@@ -217,9 +217,8 @@ class SpecialCategoryIntersection extends SpecialPage {
 						$cat = $wgRequest->getVal($key);
 						if(!empty($cat)){
 							$categories[] = $cat;
-
-							if(!startsWith($cat, $this->CATEGORY_NS_PREFIX)){
-								$html .= "<em>Warning: \"$cat\" does not start with \"{$this->CATEGORY_NS_PREFIX}\".</em><br/>\n";
+							if(!startsWith($cat, wfMsg('categoryintersection-input'))){
+								$html .= "<em>".wfMsg('categoryintersection-input-warning', $cat)."\".</em><br/>\n";
 							}
 						}
 					}
@@ -310,8 +309,9 @@ class SpecialCategoryIntersection extends SpecialPage {
 			$catNum = 1;
 			foreach($exampleCategories as $cat){
 				$queryParams[self::$CAT_PREFIX . $catNum++] = $cat;
-				if(startsWith($cat, $this->CATEGORY_NS_PREFIX)){
-					$readableCats[] = substr($cat, strlen($this->CATEGORY_NS_PREFIX));
+                $inputMsg = wfMsg('categoryintersection-input');
+				if(startsWith($cat, $inputMsg)){
+					$readableCats[] = substr($cat, strlen($inputMsg));
 				} else {
 					$readableCats[] = $cat;
 				}

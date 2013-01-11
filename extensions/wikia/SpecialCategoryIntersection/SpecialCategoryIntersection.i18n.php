@@ -50,6 +50,8 @@ Category:Genre/Hip_Hop
 Category:Hometown/United_States/California
 ',
 	'categoryintersection-summary' => 'Searched for categories: $1; limit: $2; number of results returned: $3',
+    'categoryintersection-input'   => 'Category:',
+    'categoryintersection-input-warning' => 'Warning: $1 does not start with Category:'
 );
 
 /** Message documentation (Message documentation)
