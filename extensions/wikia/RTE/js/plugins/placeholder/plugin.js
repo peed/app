@@ -28,7 +28,8 @@ CKEDITOR.plugins.add('rte-placeholder',
 
 	// get preview HTML and infomration for given placeholder
 	getPreview: function(placeholder) {
-		var self = this;
+		var deferred = new $.Deferred(),
+			self = this;
 
 		if (!this.previews) {
 			// we're not ready yet
@@ -215,8 +216,8 @@ CKEDITOR.plugins.add('rte-placeholder',
 					placeholder.data('info', info);
 				}
 
-				// try to remove scrollbars (RT #34048)
-				self.expandPlaceholder(placeholder);
+				// Resolve promise
+				deferred.resolve(preview);
 			};
 
 			// get info from backend (only for templates and magic words)
@@ -228,81 +229,86 @@ CKEDITOR.plugins.add('rte-placeholder',
 				default:
 					renderPreview({type: data.type});
 			}
+		} else {
+			deferred.resolve(preview);
 		}
 
-		return preview;
+		return deferred.promise();
 	},
 
 	// show preview popup
 	showPreview: function(placeholder) {
-		var preview = this.getPreview(placeholder);
-
-		// position preview node
-		var position = RTE.tools.getPlaceholderPosition(placeholder);
-		var tempTop,
-			freeBottomSpace = $(RTE.getInstance().getThemeSpace('contents').$).height() - position.top;
-		if (freeBottomSpace <= preview.height()) {
-			tempTop = position.top - preview.height() - placeholder.height();
-			preview.addClass('bottom');
-
-		} else {
-			tempTop = position.top + placeholder.height() + 6;
-			preview.removeClass('bottom');
-		}
-
-		preview.css({
-			'left': position.left + 'px',
-			'top': parseInt(tempTop) + 'px'
-		});
-
-		// hide remaining previews
-		this.previews.children().not(preview).hide();
-
-		// hover preview popup delay: 150ms (cursor should be kept over an placeholder for 150ms for preview to show up)
 		var self = this;
-		placeholder.data('showTimeout', setTimeout(function() {
-			// trigger custom event only when preview is about to be shown (used for tracking)
-			var visible = preview.css('display') == 'block';
-			if (!visible) {
-				placeholder.trigger('hover');
-			}
-
-			// show preview pop-up
-			preview.fadeIn();
-
-			// try to remove scrollbars (RT #34048)
-			self.expandPlaceholder(placeholder);
-		}, 150));
 
 		// clear timeout used to hide preview with small delay
 		var timeoutId = placeholder.data('hideTimeout');
 		if (timeoutId) {
 			clearTimeout(timeoutId);
 		}
+
+		$.when(this.getPreview(placeholder)).done(function(preview) {
+			// hover preview popup delay: 150ms
+			// mouse cursor must remain over placeholder for the duration
+			// of the delay for preview to become visible.
+			placeholder.data('showTimeout', setTimeout(function() {
+				preview.fadeIn();
+
+				// try to remove scrollbars (RT #34048)
+				self.expandPlaceholder(preview, placeholder);
+
+				if (preview.is(':visible')) {
+					placeholder.trigger('hover');
+				}
+
+				var top,
+					placeholderHeight = placeholder.height(),
+					position = RTE.tools.getPlaceholderPosition(placeholder),
+					previewHeight = preview.height(),
+					freeBottomSpace = $(RTE.getInstance().getThemeSpace('contents').$).height() - position.top;
+
+				if (freeBottomSpace <= previewHeight) {
+					top = position.top - previewHeight - (placeholderHeight / 2);
+					preview.addClass('bottom');
+
+				} else {
+					top = position.top + (placeholderHeight / 2);
+					preview.removeClass('bottom');
+				}
+
+				preview.css({
+					left: (position.left + (placeholder.width() / 4)) + 'px',
+					top: top + 'px'
+				});
+
+				// hide remaining previews
+				self.previews.children().not(preview).hide();
+			}, 150));
+		});
 	},
 
 	// hide preview popup
 	hidePreview: function(placeholder, hideNow) {
-		var preview = this.getPreview(placeholder),
-			showTimeout = placeholder.data('showTimeout')
+		$.when(this.getPreview(placeholder)).done(function(preview) {
+			var showTimeout = placeholder.data('showTimeout')
 
-		// clear show timeout
-		if (showTimeout) {
-			clearTimeout(showTimeout);
-		}
+			// clear show timeout
+			if (showTimeout) {
+				clearTimeout(showTimeout);
+			}
 
-		if (hideNow) {
-			// hide preview now - "close" has been clicked
-			preview.hide();
-		}
-		else {
-			// hide preview 1 sec after mouse is out
-			placeholder.data('hideTimeout', setTimeout(function() {
-				preview.fadeOut();
+			if (hideNow) {
+				// hide preview now - "close" has been clicked
+				preview.hide();
+			}
+			else {
+				// hide preview 1 sec after mouse is out
+				placeholder.data('hideTimeout', setTimeout(function() {
+					preview.fadeOut();
 
-				placeholder.removeData('hideTimeout');
-			}, 1000));
-		}
+					placeholder.removeData('hideTimeout');
+				}, 1000));
+			}
+		});
 	},
 
 	// setup given placeholder
@@ -356,7 +362,7 @@ CKEDITOR.plugins.add('rte-placeholder',
 
 		// setup events once more on each drag&drop
 		RTE.getEditor().unbind('dropped.placeholder').bind('dropped.placeholder', function(ev) {
-                        var target = $(ev.target);
+			var target = $(ev.target);
 
 			// filter out non placeholders
 			target = target.filter('img.placeholder');
@@ -392,59 +398,71 @@ CKEDITOR.plugins.add('rte-placeholder',
 	},
 
 	// expand placeholder preview (RT #34048)
-	expandPlaceholder: function(placeholder) {
-		var preview = this.getPreview(placeholder);
-
-		// detect if scrollbar is shown
+	// FIXME - still some odd behavior here. Shouldn't expand out of editarea.
+	expandPlaceholder: function(preview, placeholder) {
 		var previewArea = preview.find('.RTEPlaceholderPreviewCode');
 
 		if (previewArea.exists()) {
-			var domNode = previewArea[0];
-			var scrollBarIsShown = (domNode.scrollHeight > domNode.clientHeight) || (domNode.scrollWidth > domNode.clientWidth);
+			var element = previewArea.get(0),
+				scrollHeight = element.scrollHeight,
+				scrollWidth = element.scrollWidth,
+				height = previewArea.height(),
+				width = previewArea.width(),
+				hasHorizontalScrollBar = scrollWidth > width,
+				hasVerticalScrollBar = scrollHeight > height;
 
-			if (scrollBarIsShown) {
-				//RTE.log('expanding hover preview...');
+//console.log('hasScrollbars', hasHorizontalScrollBar || hasVerticalScrollBar );
+//console.log('scrollHeight', scrollHeight);
+//console.log('scrollWidth', scrollWidth);
+//console.log('height', height);
+//console.log('width', width);
 
-				// initial values (remove scrollbar completely)
-				var height = domNode.scrollHeight;
-				var width = domNode.scrollWidth;
+			// Scrollbar exists
+			if (hasHorizontalScrollBar || hasVerticalScrollBar) {
+				var previewOffset = preview.offset();
+//console.log(previewOffset);
+				// Try to get rid of horizontal scroll
+				if (hasHorizontalScrollBar) {
+					width = scrollWidth;
+				}
 
-				//RTE.log([width, height]);
+				// Try to get rid of vertical scroll
+				if (hasVerticalScrollBar) {
+					height = scrollHeight;
+				}
 
 				// (x,y) of bottom right corner of preview
-				var x = parseInt(preview.offset().left) + width + 16;
-				var y = parseInt(preview.offset().top) + height + 100;
-
-				//RTE.log([x, y]);
+				var x = previewOffset.left + width;
+				var y = previewOffset.top + height;
 
 				// calculate editarea size
 				var editarea = $('#cke_contents_wpTextbox1');
-				var maxX = parseInt(editarea.offset().left) + editarea.width();
-				var maxY = parseInt(editarea.offset().top) + editarea.height();
-
-				//RTE.log([maxX, maxY]);
-
+				var editareaOffset = editarea.offset();
+				var minX = editareaOffset.left;
+				var minY = editareaOffset.top;
+				var maxX = minX + editarea.width();
+				var maxY = minY + editarea.height();
+//console.log('x', x);
+//console.log('y', y);
+//console.log('maxX', maxX);
+//console.log('maxY', maxY);
 				// limit preview expansion by edges of editarea
-				if (maxX < x) {
+				if (x > maxX) {
 					width -= (x - maxX);
 				}
 
-				if (maxY < y) {
+				if (y > maxY) {
 					height -= (y - maxY);
 				}
-
-				//RTE.log([width, height]);
-
-				// now let's use it (minimum size is 350x60)
+//console.log('newHeight', height);
+//console.log('newWidth', width);
+				// Set minimum height and width
 				width = Math.max(width, 350);
 				height = Math.max(height, 60);
 
 				preview.children('.RTEPlaceholderPreviewInner').width(width);
-				previewArea.height(height);
-
-				previewArea.addClass('RTEPlaceholderPreviewExpanded');
-			}
-			else {
+				previewArea.addClass('RTEPlaceholderPreviewExpanded').height(height);
+			} else {
 				previewArea.removeClass('RTEPlaceholderPreviewExpanded');
 			}
 		}
