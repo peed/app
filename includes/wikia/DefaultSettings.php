@@ -338,6 +338,7 @@ $wgAutoloadClasses['FooterDisabledItemService'] = $IP.'/skins/oasis/modules/foot
 // TODO:move this inclusions to CommonExtensions?
 require_once( $IP.'/extensions/wikia/ImageTweaks/ImageTweaks.setup.php' );
 require_once( $IP.'/extensions/wikia/Oasis/Oasis_setup.php' );
+require_once( $IP.'/extensions/wikia/LoaderQueue/LoaderQueue.setup.php' );
 
 /**
  * i18n support for jquery.timeago.js (used in History Dropdown)
