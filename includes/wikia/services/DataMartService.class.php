@@ -1,7 +1,7 @@
 <?php
 
 /*
- * DataMart Services
+ * DataMart Service
  */
 class DataMartService extends Service {
 
@@ -15,6 +15,8 @@ class DataMartService extends Service {
 	const PERIOD_ID_ROLLING_7DAYS = 1007; // every day
 	const PERIOD_ID_ROLLING_28DAYS = 1028; // every day
 	const PERIOD_ID_ROLLING_24HOURS = 10024; // every 15 minutes
+
+	const WAM_DEFAULT_ITEM_LIMIT_PER_PAGE = 20;
 
 	/**
 	 * get pageviews
@@ -738,7 +740,7 @@ class DataMartService extends Service {
 		}
 
 		$categoryViews = WikiaDataAccess::cache(
-			$app->wf->SharedMemcKey('datamar2t', 'categories_top_wikis', $categoryId, $periodId, $startDate, $endDate, $langCode, $limit),
+			$app->wf->SharedMemcKey('datamart', 'categories_top_wikis', $categoryId, $periodId, $startDate, $endDate, $langCode, $limit),
 			12 * 60 * 60,
 			function () use ($app, $categoryId, $startDate, $endDate, $langCode, $periodId, $limit) {
 				$categoryViews = array();
@@ -784,5 +786,169 @@ class DataMartService extends Service {
 		$app->wf->ProfileOut(__METHOD__);
 
 		return $categoryViews;
+	}
+
+	/**
+	 * @param null $currentTimestamp
+	 * @param null $previousTimestamp
+	 * @param null $verticalId
+	 * @param null $wikiId
+	 * @param string $wikiWord
+	 * @param string $sortColumn
+	 * @param string $sortDirection
+	 * @param int $offset
+	 * @param int $limit
+	 * @return array
+	 */
+	public function getWamIndex ($currentTimestamp = null, $previousTimestamp = null, $verticalId = null, $wikiLang = null, $wikiId = null, $wikiWord = null, $sortColumn = 'wam_rank', $sortDirection = 'ASC', $offset = 0, $limit = self::WAM_DEFAULT_ITEM_LIMIT_PER_PAGE) {
+		$app = F::app();
+		$app->wf->profileIn(__METHOD__);
+
+		$wamIndex = array(
+			'wam_index' => array(),
+			'wam_results_total' => 0
+		);
+		if (!empty($app->wg->StatsDBEnabled)) {
+			$db = $app->wf->GetDB(DB_SLAVE, array(), $app->wg->DatamartDB);
+
+			$tables = $this->getWamIndexTables();
+			$fields = $this->getWamIndexFields();
+			$countFields = $this->getWamIndexCountFields();
+			$conds = $this->getWamIndexConditions($currentTimestamp, $previousTimestamp, $wikiId, $verticalId, $wikiLang, $wikiWord);
+			$options = $this->getWamIndexOptions($sortDirection, $sortColumn, $offset, $limit);
+			$join_conds = $this->getWamIndexJoinConditions();
+
+			$result = $db->select(
+				$tables,
+				$fields,
+				$conds,
+				__METHOD__,
+				$options,
+				$join_conds
+			);
+
+			$resultCount = $db->select(
+				$tables,
+				$countFields,
+				$conds,
+				__METHOD__,
+				array(),
+				$join_conds
+			);
+
+			/* @var $db DatabaseMysql */
+			while ($row = $db->fetchObject($result)) {
+				$row = (array)$row;
+				$wamIndex['wam_index'][$row['wiki_id']] = $row;
+			}
+			$count = $resultCount->fetchObject();
+			$wamIndex['wam_results_total'] = $count->wam_results_total;
+		}
+
+		$app->wf->profileOut(__METHOD__);
+
+		return $wamIndex;
+	}
+
+	protected function getWamIndexJoinConditions () {
+		$join_conds = array(
+			'fw2' => array(
+				'left join',
+				array(
+					'fw1.wiki_id = fw2.wiki_id',
+				)
+			),
+			'dw' => array(
+				'left join',
+				array(
+					'fw1.wiki_id = dw.wiki_id'
+				)
+			)
+		);
+		return $join_conds;
+	}
+
+	protected function getWamIndexOptions ($sortDirection, $sortColumn, $offset, $limit) {
+		$options = array();
+
+		$sortDirection = (($sortDirection == 'DESC') ? 'DESC' : 'ASC');
+
+		switch ($sortColumn) {
+			case 'wam_rank':
+			default:
+				$options['ORDER BY'] = 'wam ' . $sortDirection;
+				break;
+			case 'wam_change':
+				$options['ORDER BY'] = 'wam_change ' . $sortDirection;
+				break;
+		}
+
+		if (!is_null($offset)) {
+			$options['OFFSET'] = $offset;
+		}
+
+		if (!is_null($offset)) {
+			$options['LIMIT'] = $limit;
+			return $options;
+		}
+		return $options;
+	}
+
+	protected function getWamIndexConditions ($currentTimestamp, $previousTimestamp, $wikiId, $verticalId, $wikiLang, $wikiWord) {
+		$conds = array(
+			'fw1.time_id = FROM_UNIXTIME(' . ($currentTimestamp ? $currentTimestamp : strtotime('00:00 -2 day')) . ')',
+			'fw2.time_id = FROM_UNIXTIME(' . ($previousTimestamp ? $previousTimestamp : strtotime('00:00 -3 day')) . ')'
+		);
+
+		if (!is_null($wikiId)) {
+			$conds ['fw1.wiki_id'] = $wikiId;
+		}
+
+		if (!is_null($wikiWord)) {
+			$conds [] = "dw.url like '%" . mysql_real_escape_string($wikiWord) . "%'";
+		}
+
+		if (!is_null($verticalId)) {
+			$conds ['dw.hub_id'] = $verticalId;
+		} else {
+			$conds ['dw.hub_id'] = array(2, 3, 9);
+		}
+
+		if (!is_null($wikiLang)) {
+			$conds ['dw.lang'] = mysql_real_escape_string($wikiLang);
+		}
+
+		return $conds;
+	}
+
+	protected function getWamIndexFields () {
+		$fields = array(
+			'fw1.wiki_id',
+			'fw1.wam',
+			'fw1.wam_rank',
+			'fw1.hub_wam_rank',
+			'fw1.peak_wam_rank',
+			'fw1.peak_hub_wam_rank',
+			'dw.url',
+			'dw.hub_id',
+			'fw1.wam - fw2.wam as wam_change'
+		);
+		return $fields;
+	}
+
+	protected function getWamIndexCountFields () {
+		$fields = array(
+			'count(fw1.wiki_id) as wam_results_total'
+		);
+		return $fields;
+	}
+
+	protected function getWamIndexTables () {
+		$tables = array(
+			'fw1' => 'fact_wam_scores',
+			'fw2' => 'fact_wam_scores',
+			'dw' => 'dimension_wikis'
+		);
+		return $tables;
 	}
 }
