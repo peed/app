@@ -1,6 +1,6 @@
-// TODO: move WikiaTracker outside
+// TODO: move WikiaTrackerQueue outside
 
-var AdProviderAdDriver2 = function(wikiaDart, scriptWriter, WikiaTracker, log, window, Geo, slotTweaker, cacheStorage, adLogicHighValueCountry, adLogicDartSubdomain, abTest) {
+var AdProviderAdDriver2 = function(wikiaDart, scriptWriter, WikiaTrackerQueue, log, window, Geo, slotTweaker, cacheStorage, adLogicHighValueCountry, adLogicDartSubdomain, abTest) {
 	'use strict';
 
 	var logGroup = 'AdProviderAdDriver2',
@@ -157,7 +157,7 @@ var AdProviderAdDriver2 = function(wikiaDart, scriptWriter, WikiaTracker, log, w
 			ord = Math.floor(Math.random() * 100000000000);
 		}
 
-		WikiaTracker.track({
+		WikiaTrackerQueue.track({
 			eventName: 'liftium.slot2',
 			ga_category: 'slot2/' + slotsize.replace(/,.*$/, ''),
 			ga_action: slotname,
@@ -195,7 +195,7 @@ var AdProviderAdDriver2 = function(wikiaDart, scriptWriter, WikiaTracker, log, w
 				// Track hop time
 				hopTime = new Date().getTime() - hopTimer;
 				log('slotTimer2 end for ' + slotname + ' after ' + hopTime + ' ms', 7, logGroup);
-				WikiaTracker.track({
+				WikiaTrackerQueue.track({
 					eventName: 'liftium.hop2',
 					ga_category: 'hop2/addriver2',
 					ga_action: 'slot ' + slotname,

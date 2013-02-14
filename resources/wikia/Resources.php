@@ -87,9 +87,12 @@ return array(
 			'wikia.cookies'
 		)
 	),
-	// not yet AMD :-(
 	'wikia.tracker' => array(
-		'scripts' => 'extensions/wikia/WikiaTracker/js/WikiaTracker.js',
+		'scripts' => 'resources/wikia/modules/tracker.js',
+	),
+
+	'wikia.trackerqueue' => array(
+		'scripts' => 'resources/wikia/modules/trackerqueue.js',
 	),
 
 	// AMD modules loaded on demand
